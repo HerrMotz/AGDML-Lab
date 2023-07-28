@@ -77,40 +77,54 @@ def edits2(word):
 # function to clean text data
 def clean_text(text):
     # remove mentions of other users
-    # text = re.sub('\B@[._a-zA-Z0-9]{3,24}', '', text)
+    text = re.sub('\B@[._a-zA-Z0-9]{3,24}', '', text)
 
     # rewrite words in all caps to "very" followed by word
     # text = re.sub('([A-Z]+)', lambda x: 'very ' + x.group(0).lower(), text)
 
     # make words lowercase, because Go and go will be considered as two words
     text = text.lower()
+
     # remove multiple dots
-    text = re.sub(r'([a-z])\1{2,}', '\1', text)
+    text = re.sub(r'(\.)\1{2,}', '\1', text)
+
     # remove URLs from text (prefer safely!)
     text = re.sub('https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)', ' ',
                   text)
+
     # replace ampersand html tag with &
     text = re.sub('\&amp;', 'and', text)
+
     # remove everything but letters
     text = re.sub('[^a-z]', ' ', text)
+
     # split the sentences into words
-    words = text.split()
-    for i in range(len(words)):
+    _words = text.split()
+
+    for i in range(len(_words)):
         # remove words with length 1
-        if len(words[i]) == 1:
-            words[i] = ''
+        if len(_words[i]) == 1:
+            _words[i] = ''
+
         # remove repetition of letters
-        _tmp = re.subn(r'([a-z])\1{3,}', r'\1', words[i])
+        _tmp = re.subn(r'([a-z])\1{3,}', r'\1', _words[i])
+
         # prepend very if there were repeating letters
         # if _tmp[1] > 0:
         #     words[i] = "very " + _tmp[0]
+
     # remove stopwords like to, and, or etc.
-    # words = [word for word in words if word not in stopwords]
-    words = [correction(word) for word in words]
-    # # lemmatize each word
+    # _words = [word for word in _words if word not in stopwords]
+    _words = [correction(word) for word in _words]
+
+    # remove words if they are unknown
+    # _words = ['' if word not in words else word for word in _words]
+
+    # lemmatize each word
     # words = [wordnet_lemmatizer.lemmatize(word) for word in words]
+
     # join words to make sentence
-    text = ' '.join(words)
+    text = ' '.join(_words)
     # remove multiple spaces
     text = re.sub('\s+', ' ', text)
     text = text.strip()
