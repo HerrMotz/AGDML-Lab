@@ -30,14 +30,15 @@ print(stopwords)
 
 correct_words = [str.lower(w) for w in words.words()]
 
+# BEGIN SOURCE http://norvig.com/spell-correct.html
 from collections import Counter
 
-WORDS = Counter(correct_words)
+words = Counter(correct_words)
 
 
-def P(word, N=sum(WORDS.values())):
+def P(word, N=sum(words.values())):
     """Probability of `word`."""
-    return WORDS[word] / N
+    return words[word] / N
 
 
 def correction(word):
@@ -52,7 +53,7 @@ def candidates(word):
 
 def known(words):
     """The subset of `words` that appear in the dictionary of WORDS."""
-    return set(w for w in words if w in WORDS)
+    return set(w for w in words if w in words)
 
 
 def edits1(word):
@@ -71,18 +72,23 @@ def edits2(word):
     return (e2 for e1 in edits1(word) for e2 in edits1(e1))
 
 
+# END SOURCE
+
 # function to clean text data
 def clean_text(text):
     # remove mentions of other users
-    text = re.sub('\B@[._a-zA-Z0-9]{3,24}', '', text)
+    # text = re.sub('\B@[._a-zA-Z0-9]{3,24}', '', text)
 
     # rewrite words in all caps to "very" followed by word
     # text = re.sub('([A-Z]+)', lambda x: 'very ' + x.group(0).lower(), text)
 
     # make words lowercase, because Go and go will be considered as two words
     text = text.lower()
-    # remove URLs from text
-    text = re.sub('(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)', ' ', text)
+    # remove multiple dots
+    text = re.sub(r'([a-z])\1{2,}', '\1', text)
+    # remove URLs from text (prefer safely!)
+    text = re.sub('https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)', ' ',
+                  text)
     # replace ampersand html tag with &
     text = re.sub('\&amp;', 'and', text)
     # remove everything but letters
